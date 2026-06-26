@@ -6,251 +6,260 @@
 <title>ONB Quality Scorecard — Meeting Stage</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-  :root { color-scheme: light; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f6fa; color: #1a1a2e; font-size: 14px; }
-  .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 60%, #0f3460 100%); color: white; padding: 28px 32px; }
-  .header h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-  .header p { margin-top: 6px; color: rgba(255,255,255,0.65); font-size: 13px; }
-  .header-meta { display: flex; gap: 24px; margin-top: 14px; }
-  .header-meta span { font-size: 12px; color: rgba(255,255,255,0.5); }
-  .header-meta strong { color: rgba(255,255,255,0.85); }
-  .content { padding: 24px 32px; max-width: 1100px; margin: 0 auto; }
-  .summary-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .card { background: white; border-radius: 12px; padding: 20px 24px; border: 1px solid #e8eaed; }
-  .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-  .card-name { font-size: 17px; font-weight: 700; }
-  .card-meta { font-size: 12px; color: #666; margin-top: 3px; }
-  .score-badge { background: #f8f9fa; border-radius: 8px; padding: 8px 14px; text-align: center; min-width: 70px; }
-  .score-badge .score-num { font-size: 26px; font-weight: 800; line-height: 1; }
-  .score-badge .score-max { font-size: 11px; color: #888; }
-  .score-good { color: #2e7d32; }
-  .score-avg { color: #e65100; }
-  .score-bad { color: #c62828; }
-  .progress-bar { height: 8px; background: #e8eaed; border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
-  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
-  .fill-good { background: linear-gradient(90deg, #43a047, #66bb6a); }
-  .fill-avg { background: linear-gradient(90deg, #ef6c00, #ffa726); }
-  .fill-bad { background: linear-gradient(90deg, #e53935, #ef5350); }
-  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-  .tag { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
-  .tag-ok { background: #e8f5e9; color: #2e7d32; }
-  .tag-warn { background: #fff3e0; color: #e65100; }
-  .tag-fail { background: #ffebee; color: #c62828; }
-  .duration-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px; }
-  .dur-ok { background: #e8f5e9; color: #2e7d32; }
-  .dur-fail { background: #ffebee; color: #c62828; }
-  .section-title { font-size: 15px; font-weight: 700; color: #1a1a2e; margin: 24px 0 12px; display: flex; align-items: center; gap: 8px; }
-  .section-title::after { content: ''; flex: 1; height: 1px; background: #e8eaed; }
-  .scorecard-table { background: white; border-radius: 12px; border: 1px solid #e8eaed; overflow: hidden; margin-bottom: 24px; }
-  .scorecard-table table { width: 100%; border-collapse: collapse; }
-  .scorecard-table th { background: #1a1a2e; color: white; padding: 10px 14px; font-size: 12px; font-weight: 600; text-align: left; }
-  .scorecard-table th:first-child { width: 32px; }
-  .scorecard-table th:nth-child(2) { width: 220px; }
-  .scorecard-table th:nth-child(3) { width: 110px; }
-  .scorecard-table td { padding: 9px 14px; border-bottom: 1px solid #f0f2f5; vertical-align: top; }
-  .scorecard-table tr:last-child td { border-bottom: none; }
-  .scorecard-table tr:hover td { background: #fafbfc; }
-  .section-row td { background: #e8eaf0; font-size: 11px; font-weight: 700; color: #3949ab; text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 14px; }
-  .criterion { font-size: 13px; color: #333; line-height: 1.4; }
-  .criterion-id { font-size: 10px; color: #999; font-weight: 700; }
-  .status-cell { text-align: center; vertical-align: middle; }
-  .status-icon { font-size: 16px; line-height: 1; }
-  .status-note { font-size: 11px; color: #666; margin-top: 2px; line-height: 1.3; }
-  .quote { font-size: 11px; color: #555; font-style: italic; background: #f8f9fa; border-left: 3px solid #ddd; padding: 4px 8px; border-radius: 0 4px 4px 0; margin-top: 4px; }
-  .quote.good { border-left-color: #66bb6a; }
-  .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-  .chart-card { background: white; border-radius: 12px; border: 1px solid #e8eaed; padding: 20px; }
-  .chart-card h3 { font-size: 13px; font-weight: 700; color: #444; margin-bottom: 14px; }
-  .chart-wrap { height: 200px; position: relative; }
-  .rec-card { background: white; border-radius: 12px; border: 1px solid #e8eaed; padding: 20px 24px; margin-bottom: 16px; }
-  .rec-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-  .rec-priority { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; }
-  .p1 { background: #ffebee; color: #c62828; }
-  .p2 { background: #fff3e0; color: #e65100; }
-  .rec-item { display: flex; gap: 10px; margin-bottom: 8px; }
-  .rec-item:last-child { margin-bottom: 0; }
-  .rec-bullet { width: 20px; height: 20px; min-width: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; margin-top: 1px; }
-  .b-red { background: #e53935; }
-  .b-orange { background: #ef6c00; }
-  .rec-text { font-size: 13px; color: #333; line-height: 1.5; }
-  .system-card { background: linear-gradient(135deg, #fff3e0, #fff8f0); border-radius: 12px; border: 1px solid #ffcc02; padding: 20px 24px; margin-bottom: 24px; }
-  .system-card h3 { font-size: 14px; font-weight: 700; color: #e65100; margin-bottom: 10px; }
-  .system-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .system-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #555; }
-  .footer { text-align: center; padding: 20px; color: #aaa; font-size: 11px; }
+:root{color-scheme:light;}*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f6fa;color:#1a1a2e;font-size:14px;}
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);color:white;padding:28px 32px;}
+.header h1{font-size:22px;font-weight:700;}
+.header p{margin-top:6px;color:rgba(255,255,255,0.65);font-size:13px;}
+.header-meta{display:flex;gap:24px;margin-top:14px;}
+.header-meta span{font-size:12px;color:rgba(255,255,255,0.5);}
+.header-meta strong{color:rgba(255,255,255,0.85);}
+.content{padding:24px 32px;max-width:1300px;margin:0 auto;}
+.summary-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+.card{background:white;border-radius:12px;padding:20px 24px;border:1px solid #e8eaed;}
+.card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;}
+.card-name{font-size:17px;font-weight:700;}
+.card-meta{font-size:12px;color:#666;margin-top:3px;}
+.score-badge{background:#f8f9fa;border-radius:8px;padding:8px 14px;text-align:center;min-width:70px;}
+.score-badge .score-num{font-size:26px;font-weight:800;line-height:1;}
+.score-badge .score-max{font-size:11px;color:#888;}
+.score-avg{color:#e65100;}.score-good{color:#2e7d32;}.score-bad{color:#c62828;}
+.progress-bar{height:8px;background:#e8eaed;border-radius:4px;margin-bottom:12px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;transition:width 0.6s ease;}
+.fill-good{background:linear-gradient(90deg,#43a047,#66bb6a);}
+.fill-avg{background:linear-gradient(90deg,#ef6c00,#ffa726);}
+.fill-bad{background:linear-gradient(90deg,#e53935,#ef5350);}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.tag{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;}
+.tag-ok{background:#e8f5e9;color:#2e7d32;}
+.tag-warn{background:#fff3e0;color:#e65100;}
+.tag-fail{background:#ffebee;color:#c62828;}
+.duration-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;margin-top:8px;}
+.dur-ok{background:#e8f5e9;color:#2e7d32;}.dur-fail{background:#ffebee;color:#c62828;}
+.section-title{font-size:15px;font-weight:700;color:#1a1a2e;margin:24px 0 12px;display:flex;align-items:center;gap:8px;}
+.section-title::after{content:'';flex:1;height:1px;background:#e8eaed;}
+.scorecard-table{background:white;border-radius:12px;border:1px solid #e8eaed;overflow:hidden;margin-bottom:24px;}
+.scorecard-table table{width:100%;border-collapse:collapse;}
+.scorecard-table th{background:#1a1a2e;color:white;padding:10px 14px;font-size:12px;font-weight:600;text-align:left;}
+.scorecard-table td{padding:9px 14px;border-bottom:1px solid #f0f2f5;vertical-align:top;}
+.scorecard-table tr:last-child td{border-bottom:none;}
+.scorecard-table tr:hover td{background:#fafbfc;}
+.section-row td{background:#e8eaf0;font-size:11px;font-weight:700;color:#3949ab;text-transform:uppercase;letter-spacing:0.5px;padding:6px 14px;}
+.criterion{font-size:13px;color:#333;line-height:1.4;}
+.criterion-id{font-size:10px;color:#999;font-weight:700;}
+.status-cell{text-align:center;vertical-align:middle;}
+.status-icon{font-size:16px;line-height:1;}
+.status-note{font-size:11px;color:#666;margin-top:2px;line-height:1.3;}
+.quote{font-size:11px;color:#555;font-style:italic;background:#f8f9fa;border-left:3px solid #ddd;padding:4px 8px;border-radius:0 4px 4px 0;margin-top:4px;}
+.quote.good{border-left-color:#66bb6a;}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.chart-card{background:white;border-radius:12px;border:1px solid #e8eaed;padding:20px;}
+.chart-card h3{font-size:13px;font-weight:700;color:#444;margin-bottom:14px;}
+.chart-wrap{height:220px;position:relative;}
+.rec-card{background:white;border-radius:12px;border:1px solid #e8eaed;padding:20px 24px;margin-bottom:16px;}
+.rec-card h3{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.rec-priority{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;}
+.p1{background:#ffebee;color:#c62828;}.p2{background:#fff3e0;color:#e65100;}
+.rec-item{display:flex;gap:10px;margin-bottom:8px;}
+.rec-bullet{width:20px;height:20px;min-width:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;margin-top:1px;}
+.b-red{background:#e53935;}.b-orange{background:#ef6c00;}
+.rec-text{font-size:13px;color:#333;line-height:1.5;}
+.system-card{background:linear-gradient(135deg,#fff3e0,#fff8f0);border-radius:12px;border:1px solid #ffcc02;padding:20px 24px;margin-bottom:24px;}
+.system-card h3{font-size:14px;font-weight:700;color:#e65100;margin-bottom:10px;}
+.system-items{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.system-item{display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#555;}
+.footer{text-align:center;padding:20px;color:#aaa;font-size:11px;}
+.best{background:#e8f5e9!important;}
 </style>
 </head>
 <body>
 <div class="header">
-  <h1>🎯 ONB Quality Scorecard — Meeting Stage (AS FLOW 2025)</h1>
-  <p>Analýza onboardingových nahrávek vs. požadavky AS FLOW 2025</p>
-  <div class="header-meta">
-    <span><strong>Zdroj dat:</strong> Google Drive ASR transcript (lang: cs)</span>
-    <span><strong>Datum:</strong> 25. 6. 2026</span>
-    <span><strong>Požadavky:</strong> AS FLOW 2025 — Meeting Stage</span>
-  </div>
+<h1>🎯 ONB Quality Scorecard — Meeting Stage (AS FLOW 2025)</h1>
+<p>Analýza onboardingových nahrávek vs. požadavky AS FLOW 2025</p>
+<div class="header-meta">
+<span><strong>Zdroj dat:</strong> Google Drive ASR transcript (lang: cs)</span>
+<span><strong>Datum analýzy:</strong> 26. 6. 2026</span>
+<span><strong>Požadavky:</strong> AS FLOW 2025 — Meeting Stage (3️⃣)</span>
+</div>
 </div>
 <div class="content">
-  <div class="section-title">Přehled hodnocení</div>
-  <div class="summary-cards">
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Anet (Aneta Jakubowska)</div>
-          <div class="card-meta">Lot of wine + bubbles — 11. 6. 2026</div>
-          <div class="duration-badge dur-fail">⏱ 66:09 min — PŘEKROČEN LIMIT (+6 min)</div>
-        </div>
-        <div class="score-badge"><div class="score-num score-avg">8</div><div class="score-max">/ 21 bodů</div></div>
-      </div>
-      <div class="progress-bar"><div class="progress-fill fill-avg" style="width:38%"></div></div>
-      <div style="font-size:12px;color:#666;margin-bottom:8px">38 % splnění (8/21 bodů)</div>
-      <div class="tag-row">
-        <span class="tag tag-ok">✅ Agenda přehled</span><span class="tag tag-ok">✅ Smlouva check</span>
-        <span class="tag tag-ok">✅ Platforma přístup</span><span class="tag tag-ok">✅ Social media</span>
-        <span class="tag tag-ok">✅ QR kódy</span><span class="tag tag-ok">✅ POS/Storyous</span>
-        <span class="tag tag-fail">❌ Icebreak</span><span class="tag tag-fail">❌ 2 schůzky info</span>
-        <span class="tag tag-fail">❌ 21 dní launch</span><span class="tag tag-fail">❌ Adyen</span>
-        <span class="tag tag-fail">❌ 2. schůzka</span><span class="tag tag-fail">❌ Wrap-up email</span>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header">
-        <div>
-          <div class="card-name">Linh (Thuy Linh Nguyenová)</div>
-          <div class="card-meta">Kebab - Pizza - Burger — 15. 6. 2026</div>
-          <div class="duration-badge dur-ok">✅ 41:22 min — v limitu</div>
-        </div>
-        <div class="score-badge"><div class="score-num score-avg">7</div><div class="score-max">/ 21 bodů</div></div>
-      </div>
-      <div class="progress-bar"><div class="progress-fill fill-avg" style="width:33%"></div></div>
-      <div style="font-size:12px;color:#666;margin-bottom:8px">33 % splnění (7/21 bodů)</div>
-      <div class="tag-row">
-        <span class="tag tag-ok">✅ Platforma přístup</span><span class="tag tag-ok">✅ Doména</span>
-        <span class="tag tag-ok">✅ Social media</span><span class="tag tag-ok">✅ QR kódy</span>
-        <span class="tag tag-ok">✅ Wrap-up email</span><span class="tag tag-ok">✅ Next steps</span>
-        <span class="tag tag-warn">⚠️ Launch "spuštění"</span>
-        <span class="tag tag-fail">❌ Sebepředstavení</span><span class="tag tag-fail">❌ Icebreak</span>
-        <span class="tag tag-fail">❌ Agenda přehled</span><span class="tag tag-fail">❌ 2 schůzky info</span>
-        <span class="tag tag-fail">❌ Adyen</span>
-      </div>
-    </div>
-  </div>
-  <div class="charts-row">
-    <div class="chart-card"><h3>Radar — pokrytí požadavků AS FLOW</h3><div class="chart-wrap"><canvas id="radarChart"></canvas></div></div>
-    <div class="chart-card"><h3>Srovnání sekcí (body)</h3><div class="chart-wrap"><canvas id="barChart"></canvas></div></div>
-  </div>
-  <div class="section-title">Detailní scorecard</div>
-  <div class="scorecard-table"><table><thead><tr><th>#</th><th>Kritérium / Požadavek AS FLOW</th><th>Sekce</th><th style="width:200px">ANET</th><th style="width:200px">LINH</th></tr></thead><tbody>
-  <tr class="section-row"><td colspan="5">INTRO — Představení a icebreak (max 15 min)</td></tr>
-  <tr><td><span class="criterion-id">1.1</span></td><td class="criterion">Manažer se představil jménem a rolí</td><td class="criterion-id">Intro</td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Klienti ji znají jako "paní Aneta", bez explicitního intro</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Okamžitě sdílí obrazovku (0:00)</div><div class="quote">"A hnedka s váma nasdílím obrazovku a můžeme rovnou začít."</div></td></tr>
-  <tr><td><span class="criterion-id">1.2</span></td><td class="criterion">Icebreak — osobní kontakt, business cíle/ROI</td><td class="criterion-id">Intro</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Žádný icebreak (0:24)</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Žádný icebreak, okamžitě technická práce</div></td></tr>
-  <tr><td><span class="criterion-id">1.3</span></td><td class="criterion">Přehled agendy schůzky</td><td class="criterion-id">Intro</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Abych se ještě shrnula, o čem se budeme bavit..."</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Žádný přehled agendy</div></td></tr>
-  <tr class="section-row"><td colspan="5">INTRO — Smlouva a podmínky</td></tr>
-  <tr><td><span class="criterion-id">2.1</span></td><td class="criterion">Ověřila features ze smlouvy</td><td class="criterion-id">Smlouva</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"předplatné standard... QR objednávky... Storous. Je to tak?"</div></td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">3:35 — okrajově, bez potvrzení</div></td></tr>
-  <tr><td><span class="criterion-id">2.2</span></td><td class="criterion">2 schůzky zdarma (nad rámec = 1500 Kč/hod)</td><td class="criterion-id">Smlouva</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td></tr>
-  <tr><td><span class="criterion-id">2.3</span></td><td class="criterion">21denní launch perioda a aktivní spolupráce</td><td class="criterion-id">Smlouva</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">"spuštění" (7:02, 34:56), bez "21 dní"</div></td></tr>
-  <tr><td><span class="criterion-id">2.4</span></td><td class="criterion">Kdo bude systém používat</td><td class="criterion-id">Smlouva</td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Neověřeno</div></td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Neověřeno</div></td></tr>
-  <tr><td><span class="criterion-id">2.5</span></td><td class="criterion">Přístup do platformy + registrace</td><td class="criterion-id">Smlouva</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:41 — zasílá přístupy</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:19 — okamžitě zasílá</div></td></tr>
-  <tr class="section-row"><td colspan="5">INTRO — Verifikace (Adyen, POS, Doména, Social, QR)</td></tr>
-  <tr><td><span class="criterion-id">3.1</span></td><td class="criterion">Adyen — stav + postup</td><td class="criterion-id">Verif.</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přeskočeno</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přeskočeno</div></td></tr>
-  <tr><td><span class="criterion-id">3.2</span></td><td class="criterion">POS integrace a upgrade</td><td class="criterion-id">Verif.</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:35 — Storyous potvrzeno</div></td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Neprobrána</div></td></tr>
-  <tr><td><span class="criterion-id">3.3</span></td><td class="criterion">Doména — vlastní/pro-linky/subdoména</td><td class="criterion-id">Verif.</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Neprobrána</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Dobře, super. Tak doména." (13:39)</div></td></tr>
-  <tr><td><span class="criterion-id">3.4</span></td><td class="criterion">Social media — 4 pilliers, weblinky</td><td class="criterion-id">Verif.</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">4:41 — Instagram, Facebook</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">~11:24 — ověřeno</div></td></tr>
-  <tr><td><span class="criterion-id">3.5</span></td><td class="criterion">QR kódy</td><td class="criterion-id">Verif.</td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:30, 5:30</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">Ověřeno</div></td></tr>
-  <tr class="section-row"><td colspan="5">BACKOFFICE — Step by Step (max 45 min)</td></tr>
-  <tr><td><span class="criterion-id">4.1–4.7</span></td><td class="criterion">Backoffice průchod (Menu, Areas, Tablet, Settings, Template, Features, Clients)</td><td class="criterion-id">BO</td>
-  <td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Probíhá ale přetáhl — v 63:00 ještě Clients tab</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">Proběhl do 41 min vč. discounts/loyalty</div></td></tr>
-  <tr><td><span class="criterion-id">4.8</span></td><td class="criterion">Review + dohoda 2. schůzky</td><td class="criterion-id">BO</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nenalezeno</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"v pondělí by kolegyně mohla... od dvou do tří" (40:32)</div></td></tr>
-  <tr><td><span class="criterion-id">4.9</span></td><td class="criterion">Wrap-up email po schůzce</td><td class="criterion-id">BO</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"pošlu shrnující email, na čem jsme se domluvili" (41:12)</div></td></tr>
-  <tr class="section-row"><td colspan="5">Celkové parametry</td></tr>
-  <tr><td><span class="criterion-id">5.1</span></td><td class="criterion">Celková délka max 60 minut</td><td class="criterion-id">Param.</td>
-  <td class="status-cell"><div class="status-icon">❌</div><div class="status-note">66:09 min — o 6 min nad limit</div></td>
-  <td class="status-cell"><div class="status-icon">✅</div><div class="status-note">41:22 min ✅</div></td></tr>
-  </tbody></table></div>
-  <div class="system-card">
-    <h3>⚠️ Systémové nálezy — shodné vzorce u obou manažerek</h3>
-    <div class="system-items">
-      <div class="system-item">❌ <span>Chybí <strong>icebreak</strong> — obě jdou okamžitě do techniky</span></div>
-      <div class="system-item">❌ <span><strong>Adyen</strong> přeskočen u obou</span></div>
-      <div class="system-item">❌ <span><strong>2 schůzky zdarma + 1500 Kč</strong> — klienti neví</span></div>
-      <div class="system-item">❌ <span><strong>21denní launch perioda</strong> — podmínky nezmíněny</span></div>
-      <div class="system-item">❌ <span>Žádné explicitní <strong>sebepředstavení</strong> s rolí</span></div>
-      <div class="system-item">⚠️ <span>Introduction section chybí jako <strong>strukturovaná fáze</strong></span></div>
-    </div>
-  </div>
-  <div class="section-title">Doporučení</div>
-  <div class="rec-card">
-    <h3>Priorita 1 — Okamžitě <span class="rec-priority p1">KRITICKÉ</span></h3>
-    <div class="rec-item"><div class="rec-bullet b-red">1</div><div class="rec-text"><strong>Standardizovat první 3 minuty každého onboardingu:</strong> jméno + role + "jak se daří?" + přehled agendy.</div></div>
-    <div class="rec-item"><div class="rec-bullet b-red">2</div><div class="rec-text"><strong>Vždy zmínit 2 schůzky zdarma + 1500 Kč</strong> — klienti neví, potenciální konflikt.</div></div>
-    <div class="rec-item"><div class="rec-bullet b-red">3</div><div class="rec-text"><strong>Adyen check je povinný krok</strong> — jinak klient nemůže platit.</div></div>
-  </div>
-  <div class="rec-card">
-    <h3>Priorita 2 — Do příštího tréninku <span class="rec-priority p2">DŮLEŽITÉ</span></h3>
-    <div class="rec-item"><div class="rec-bullet b-orange">4</div><div class="rec-text"><strong>21denní launch perioda</strong> — přidat do smlouva check s konkrétní periodou.</div></div>
-    <div class="rec-item"><div class="rec-bullet b-orange">5</div><div class="rec-text"><strong>Wrap-up email — Linh vs. Anet:</strong> Linh to dělá vzorně (41:12). Sdílet jako best practice.</div></div>
-    <div class="rec-item"><div class="rec-bullet b-orange">6</div><div class="rec-text"><strong>Délka meetingu:</strong> Anet o 6 min nad limit. Doporučit milestone checklist (intro 0–15, backoffice 15–60).</div></div>
-  </div>
+<div class="section-title">Přehled hodnocení (3 manažeři)</div>
+<div class="summary-cards">
+<div class="card">
+<div class="card-header">
+<div><div class="card-name">Anet (Aneta Jakubowska)</div>
+<div class="card-meta">Lot of wine + bubbles — 11. 6. 2026</div>
+<div class="duration-badge dur-fail">⏱ 66:09 min — PŘEKROČEN LIMIT</div></div>
+<div class="score-badge"><div class="score-num score-avg">8</div><div class="score-max">/ 21 bodů</div></div>
 </div>
-<div class="footer">AS FLOW 2025 — ONB Quality Review · Zdroj: ASR transcript Google Drive (lang: cs) · 25. 6. 2026</div>
+<div class="progress-bar"><div class="progress-fill fill-avg" style="width:38%"></div></div>
+<div style="font-size:12px;color:#666;margin-bottom:8px">38 % splnění</div>
+<div class="tag-row">
+<span class="tag tag-ok">✅ Agenda</span><span class="tag tag-ok">✅ Smlouva</span><span class="tag tag-ok">✅ Platforma</span>
+<span class="tag tag-ok">✅ Social</span><span class="tag tag-ok">✅ QR</span><span class="tag tag-ok">✅ POS</span>
+<span class="tag tag-fail">❌ Icebreak</span><span class="tag tag-fail">❌ 2 schůzky</span>
+<span class="tag tag-fail">❌ 21 dní</span><span class="tag tag-fail">❌ Adyen</span><span class="tag tag-fail">❌ Wrap-up email</span>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<div><div class="card-name">Linh (Thuy Linh Nguyenová)</div>
+<div class="card-meta">Kebab - Pizza - Burger — 15. 6. 2026</div>
+<div class="duration-badge dur-ok">✅ 41:22 min — v limitu</div></div>
+<div class="score-badge"><div class="score-num score-avg">7</div><div class="score-max">/ 21 bodů</div></div>
+</div>
+<div class="progress-bar"><div class="progress-fill fill-avg" style="width:33%"></div></div>
+<div style="font-size:12px;color:#666;margin-bottom:8px">33 % splnění</div>
+<div class="tag-row">
+<span class="tag tag-ok">✅ Platforma</span><span class="tag tag-ok">✅ Doména</span><span class="tag tag-ok">✅ Social</span>
+<span class="tag tag-ok">✅ QR</span><span class="tag tag-ok">✅ Wrap-up email</span><span class="tag tag-ok">✅ Next steps</span>
+<span class="tag tag-warn">⚠️ Launch</span>
+<span class="tag tag-fail">❌ Icebreak</span><span class="tag tag-fail">❌ Agenda</span><span class="tag tag-fail">❌ Adyen</span>
+</div>
+</div>
+<div class="card best">
+<div class="card-header">
+<div><div class="card-name">Serhii (Serhii Riahuzov)</div>
+<div class="card-meta">Sidequest Lounge — 15. 6. 2026</div>
+<div class="duration-badge dur-ok">✅ 27:53 min — nejkratší ✅</div></div>
+<div class="score-badge"><div class="score-num score-good">11</div><div class="score-max">/ 21 bodů</div></div>
+</div>
+<div class="progress-bar"><div class="progress-fill fill-good" style="width:52%"></div></div>
+<div style="font-size:12px;color:#666;margin-bottom:8px">52 % splnění — 🏆 nejlepší z trojice</div>
+<div class="tag-row">
+<span class="tag tag-ok">✅ Smlouva</span><span class="tag tag-ok">✅ Platforma</span><span class="tag tag-ok">✅ POS</span>
+<span class="tag tag-ok">✅ Doména</span><span class="tag tag-ok">✅ Social</span><span class="tag tag-ok">✅ QR</span>
+<span class="tag tag-ok">✅ Backoffice</span><span class="tag tag-ok">✅ Wrap-up email</span><span class="tag tag-ok">✅ Délka</span>
+<span class="tag tag-fail">❌ Icebreak</span><span class="tag tag-fail">❌ Agenda</span><span class="tag tag-fail">❌ Adyen</span>
+</div>
+</div>
+</div>
+
+<div class="charts-row">
+<div class="chart-card"><h3>Radar — pokrytí požadavků AS FLOW</h3><div class="chart-wrap"><canvas id="radarChart"></canvas></div></div>
+<div class="chart-card"><h3>Srovnání sekcí (body ze 3)</h3><div class="chart-wrap"><canvas id="barChart"></canvas></div></div>
+</div>
+
+<div class="section-title">Detailní scorecard</div>
+<div class="scorecard-table"><table>
+<thead><tr><th>#</th><th>Kritérium / Požadavek AS FLOW</th><th>Sekce</th><th style="width:170px">ANET</th><th style="width:170px">LINH</th><th style="width:170px">SERHII ⭐</th></tr></thead>
+<tbody>
+<tr class="section-row"><td colspan="6">INTRO — Představení a icebreak (max 15 min)</td></tr>
+<tr><td><span class="criterion-id">1.1</span></td><td class="criterion">Sebepředstavení jménem a rolí</td><td class="criterion-id">Intro</td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Klienti ji znají jako "paní Aneta"</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Okamžitě sdílí obrazovku (0:00)</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přímo do obsahu smlouvy (0:01)</div></td></tr>
+<tr><td><span class="criterion-id">1.2</span></td><td class="criterion">Icebreak — osobní kontakt, business cíle/ROI</td><td class="criterion-id">Intro</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přímý přechod na byznys</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Okamžitě technická práce</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Okamžitě do smlouvy</div></td></tr>
+<tr><td><span class="criterion-id">1.3</span></td><td class="criterion">Přehled agendy schůzky</td><td class="criterion-id">Intro</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Abych se ještě shrnula..." (0:24)</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Žádný přehled</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Žádný přehled</div></td></tr>
+<tr class="section-row"><td colspan="6">INTRO — Smlouva a podmínky</td></tr>
+<tr><td><span class="criterion-id">2.1</span></td><td class="criterion">Ověřila features ze smlouvy</td><td class="criterion-id">Smlouva</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"předplatné standard... QR... Storous. Je to tak?" (0:28)</div></td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">3:35 — okrajově</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Máte standard... rezervace, platby od stolu, dotykačka." (0:01)</div></td></tr>
+<tr><td><span class="criterion-id">2.2</span></td><td class="criterion">2 schůzky zdarma + 1500 Kč</td><td class="criterion-id">Smlouva</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td></tr>
+<tr><td><span class="criterion-id">2.3</span></td><td class="criterion">21denní launch perioda</td><td class="criterion-id">Smlouva</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">"spuštění" bez podmínek</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td></tr>
+<tr><td><span class="criterion-id">2.4</span></td><td class="criterion">Kdo bude systém používat</td><td class="criterion-id">Smlouva</td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Neověřeno explicitně</div></td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Neověřeno explicitně</div></td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Neověřeno explicitně</div></td></tr>
+<tr><td><span class="criterion-id">2.5</span></td><td class="criterion">Přístup do platformy + registrace</td><td class="criterion-id">Smlouva</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:41 — zasílá přístupy</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:19 — okamžitě zasílá</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">2:49 — přístup k administraci</div></td></tr>
+<tr class="section-row"><td colspan="6">INTRO — Verifikace (Adyen, POS, Doména, Social, QR)</td></tr>
+<tr><td><span class="criterion-id">3.1</span></td><td class="criterion">Adyen — stav + postup</td><td class="criterion-id">Verif.</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přeskočeno</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přeskočeno</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Přeskočeno</div></td></tr>
+<tr><td><span class="criterion-id">3.2</span></td><td class="criterion">POS integrace (Storyous/Dotykačka)</td><td class="criterion-id">Verif.</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:35 — Storyous potvrzeno</div></td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Neprobrána</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:13 — Dotykačka probrána, klient vysvětlil proč nepotřebuje</div></td></tr>
+<tr><td><span class="criterion-id">3.3</span></td><td class="criterion">Doména — vlastní/pro-linky/subdoména</td><td class="criterion-id">Verif.</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Neprobrána</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Tak doména." (13:39)</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"naší subdoméně. Je to site sidequest..." (14:18)</div></td></tr>
+<tr><td><span class="criterion-id">3.4</span></td><td class="criterion">Social media — 4 pilliers, weblinky</td><td class="criterion-id">Verif.</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">4:41 — Instagram, Facebook</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">~11:24 — ověřeno</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">14:44 — Google, Instagram přidány</div></td></tr>
+<tr><td><span class="criterion-id">3.5</span></td><td class="criterion">QR kódy</td><td class="criterion-id">Verif.</td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">0:30, 5:30</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">Ověřeno</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"QR kódy bude mít 25, černá barva." (27:27)</div></td></tr>
+<tr class="section-row"><td colspan="6">BACKOFFICE — Step by Step (max 45 min)</td></tr>
+<tr><td><span class="criterion-id">4.1–4.7</span></td><td class="criterion">Backoffice průchod (Menu, Areas, Tablet, Settings, Template, Features, Clients)</td><td class="criterion-id">BO</td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="status-note">Probíhá ale přetáhl — v 63:00 ještě Clients</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">Proběhl do 41 min</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">Kompletní do 27:53 — nejefektivnější</div></td></tr>
+<tr><td><span class="criterion-id">4.8</span></td><td class="criterion">Review + dohoda 2. schůzky</td><td class="criterion-id">BO</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nenalezeno</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"v pondělí by kolegyně mohla..." (40:32)</div></td>
+<td class="status-cell"><div class="status-icon">⚠️</div><div class="quote good">"Kdyby něco náhodou, můžete mě kontaktovat." (27:37)</div></td></tr>
+<tr><td><span class="criterion-id">4.9</span></td><td class="criterion">Wrap-up email po schůzce</td><td class="criterion-id">BO</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">Nezmíněno</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"pošlu shrnující email..." (41:12)</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="quote good">"Zašlu vám ještě dnes zprávu shrnutí dnešní schůzky" (27:42)</div></td></tr>
+<tr class="section-row"><td colspan="6">Celkové parametry</td></tr>
+<tr><td><span class="criterion-id">5.1</span></td><td class="criterion">Celková délka max 60 minut</td><td class="criterion-id">Param.</td>
+<td class="status-cell"><div class="status-icon">❌</div><div class="status-note">66:09 min — o 6 min nad limit</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">41:22 min ✅</div></td>
+<td class="status-cell"><div class="status-icon">✅</div><div class="status-note">27:53 min ✅ — nejkratší</div></td></tr>
+</tbody></table></div>
+
+<div class="system-card">
+<h3>⚠️ Systémové nálezy — konzistentní u všech tří manažerů</h3>
+<div class="system-items">
+<div class="system-item">❌ <span><strong>Icebreak</strong> — nikdo nezačíná osobní konverzací</span></div>
+<div class="system-item">❌ <span><strong>Adyen</strong> přeskočen u všech tří — klíčová platební integrace</span></div>
+<div class="system-item">❌ <span><strong>2 schůzky zdarma + 1500 Kč</strong> — klienti neví</span></div>
+<div class="system-item">❌ <span><strong>21denní launch perioda</strong> — podmínky nezmíněny (výjimka Linh: "spuštění")</span></div>
+<div class="system-item">❌ <span>Žádné explicitní <strong>sebepředstavení</strong> s rolí</span></div>
+<div class="system-item">⭐ <span><strong>Serhii nejlepší</strong> v délce (27:53) + verifikaci (doména, POS, wrap-up)</span></div>
+</div>
+</div>
+
+<div class="section-title">Doporučení</div>
+<div class="rec-card">
+<h3>Priorita 1 — Okamžitě <span class="rec-priority p1">KRITICKÉ</span></h3>
+<div class="rec-item"><div class="rec-bullet b-red">1</div><div class="rec-text"><strong>Standardizovat první 3 minuty:</strong> jméno + role + icebreak + agenda. Všichni tři přeskakují Introduction section.</div></div>
+<div class="rec-item"><div class="rec-bullet b-red">2</div><div class="rec-text"><strong>Vždy zmínit 2 schůzky zdarma + 1500 Kč</strong> — konzistentně chybí u všech.</div></div>
+<div class="rec-item"><div class="rec-bullet b-red">3</div><div class="rec-text"><strong>Adyen check je povinný krok</strong> — přeskočen u všech tří.</div></div>
+</div>
+<div class="rec-card">
+<h3>Best practices k sdílení <span class="rec-priority p2">DOPORUČENÍ</span></h3>
+<div class="rec-item"><div class="rec-bullet b-orange">4</div><div class="rec-text"><strong>Serhii: délka a efektivita</strong> — 27:53 min, kompletní backoffice, wrap-up email. Sdílet jako benchmark pro ostatní.</div></div>
+<div class="rec-item"><div class="rec-bullet b-orange">5</div><div class="rec-text"><strong>Linh: wrap-up email + next steps</strong> — "pošlu shrnující email, co je potřeba dotáhnout" (41:12). Vzorový záver schůzky.</div></div>
+<div class="rec-item"><div class="rec-bullet b-orange">6</div><div class="rec-text"><strong>Anet: agenda přehled na začátku</strong> — jako jediná říká "Abych se ještě shrnula, o čem se budeme bavit..." (0:24). Ostatní by měli adoptovat.</div></div>
+</div>
+</div>
+<div class="footer">AS FLOW 2025 — ONB Quality Review · ASR transcript Google Drive (lang: cs) · 26. 6. 2026</div>
 <script>
-const radarCtx = document.getElementById('radarChart').getContext('2d');
-new Chart(radarCtx, {
-  type: 'radar',
-  data: {
-    labels: ['Sebepředst.','Icebreak','Agenda','Smlouva','2 schůzky','21 dní','Platforma','Adyen','POS','Doména','Social','QR','Závěr'],
-    datasets: [
-      {label:'Anet',data:[1,0,3,3,0,0,3,0,3,0,3,3,0],backgroundColor:'rgba(33,150,243,0.15)',borderColor:'rgba(33,150,243,0.8)',borderWidth:2,pointBackgroundColor:'rgba(33,150,243,0.8)',pointRadius:3},
-      {label:'Linh',data:[0,0,0,1,0,1,3,0,0,3,3,3,3],backgroundColor:'rgba(76,175,80,0.15)',borderColor:'rgba(76,175,80,0.8)',borderWidth:2,pointBackgroundColor:'rgba(76,175,80,0.8)',pointRadius:3}
-    ]
-  },
-  options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:3,ticks:{display:false},pointLabels:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10}}}}
-});
-const barCtx = document.getElementById('barChart').getContext('2d');
-new Chart(barCtx, {
-  type: 'bar',
-  data: {
-    labels: ['Intro','Smlouva','Verifikace','Backoffice','Parametry'],
-    datasets: [
-      {label:'Anet',data:[1,3,7,2,0],backgroundColor:'rgba(33,150,243,0.75)',borderRadius:4},
-      {label:'Linh',data:[0,4,6,6,3],backgroundColor:'rgba(76,175,80,0.75)',borderRadius:4},
-      {label:'Max možný',data:[9,6,9,9,3],backgroundColor:'rgba(0,0,0,0.07)',borderRadius:4}
-    ]
-  },
-  options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:12,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10}}}}
-});
+const rCtx=document.getElementById('radarChart').getContext('2d');
+new Chart(rCtx,{type:'radar',data:{labels:['Sebepředst.','Icebreak','Agenda','Smlouva','2 schůzky','21 dní','Platforma','Adyen','POS','Doména','Social','QR','Závěr'],datasets:[
+{label:'Anet',data:[1,0,3,3,0,0,3,0,3,0,3,3,0],backgroundColor:'rgba(33,150,243,0.15)',borderColor:'rgba(33,150,243,0.8)',borderWidth:2,pointRadius:3},
+{label:'Linh',data:[0,0,0,1,0,1,3,0,0,3,3,3,3],backgroundColor:'rgba(76,175,80,0.15)',borderColor:'rgba(76,175,80,0.8)',borderWidth:2,pointRadius:3},
+{label:'Serhii',data:[0,0,0,3,0,0,3,0,3,3,3,3,3],backgroundColor:'rgba(255,152,0,0.15)',borderColor:'rgba(255,152,0,0.8)',borderWidth:2,pointRadius:3}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:3,ticks:{display:false},pointLabels:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10}}}}});
+const bCtx=document.getElementById('barChart').getContext('2d');
+new Chart(bCtx,{type:'bar',data:{labels:['Intro','Smlouva','Verifikace','Backoffice','Parametry'],datasets:[
+{label:'Anet',data:[1,3,7,2,0],backgroundColor:'rgba(33,150,243,0.75)',borderRadius:4},
+{label:'Linh',data:[0,4,6,6,3],backgroundColor:'rgba(76,175,80,0.75)',borderRadius:4},
+{label:'Serhii',data:[0,4,8,8,3],backgroundColor:'rgba(255,152,0,0.75)',borderRadius:4},
+{label:'Max',data:[9,6,9,9,3],backgroundColor:'rgba(0,0,0,0.07)',borderRadius:4}
+]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,max:12,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}},plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:10}}}}});
 </script>
 </body>
 </html>
